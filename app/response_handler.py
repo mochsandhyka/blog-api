@@ -2,16 +2,37 @@ from http import HTTPStatus
 from flask import make_response,jsonify
 
 def ok(data):
-    return make_response(jsonify(data)),HTTPStatus.OK.value
+    response = {
+            "code": "200",
+            "status": "OK",
+            "data": data,
+    }
+    return make_response(jsonify(response)),HTTPStatus.OK.value
 
-def created(data):
-    return make_response(jsonify(data)),HTTPStatus.CREATED.value
+def created(data, message):
+    response = {
+            "code": "201",
+            "status": "CREATED",
+            "data": data,
+            "message": message
+    }
+    return make_response(jsonify(response)),HTTPStatus.CREATED.value
 
 def bad_request(data):
-    return make_response(jsonify(data)),HTTPStatus.BAD_REQUEST.value
+    response = {
+        "code": "400",
+        "status": "BAD_REQUEST",
+        "errors": data
+    }
+    return make_response(jsonify(response)),HTTPStatus.BAD_REQUEST.value
 
 def bad_gateway(data):
-    return make_response(jsonify(data)),HTTPStatus.BAD_GATEWAY.value
+    response = {
+        "code": "500",
+        "status": "BAD_GATEWAY",
+        "errors": data
+    }
+    return make_response(jsonify(response)),HTTPStatus.BAD_GATEWAY.value
 
 def forbidden(data):
     return make_response(jsonify(data)),HTTPStatus.FORBIDDEN.value
@@ -20,4 +41,9 @@ def unautorized(data):
     return make_response(jsonify(data)),HTTPStatus.UNAUTHORIZED.value
 
 def not_found(data):
-    return make_response(jsonify(data)),HTTPStatus.NOT_FOUND.value
+    response = {
+        "code": "404",
+        "status": "NOT_FOUND",
+        "errors": data
+    }
+    return make_response(jsonify(response)),HTTPStatus.NOT_FOUND.value

@@ -7,8 +7,12 @@ def User():
     }
     return schema
 
-def Address():
+def update_user():
     schema = {
+        "name" : str,
+        "username" : str,
+        "password" : str,
+        "email" : str,
         "address" : str,
         "rt" : str,
         "rw" : str,
@@ -16,3 +20,4 @@ def Address():
         "kecamatan" : str
     }
     return schema
+

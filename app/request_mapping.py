@@ -7,8 +7,12 @@ def create_user(json_body):
     }
     return data
 
-def create_address(json_body):
+def update_user(json_body):
     data = {
+        "name": json_body['name'],
+        "username": json_body['username'],
+        "password": json_body['password'],
+        "email": json_body['email'],
         "address" : json_body['address'],
         "rt" : json_body['rt'],
         "rw" : json_body['rw'],
@@ -16,4 +20,3 @@ def create_address(json_body):
         "kecamatan" : json_body['kecamatan']
     }
     return data
-

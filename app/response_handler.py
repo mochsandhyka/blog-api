@@ -1,11 +1,21 @@
 from http import HTTPStatus
 from flask import make_response,jsonify
 
-def ok(data):
+def ok(data, message):
     response = {
             "code": "200",
             "status": "OK",
             "data": data,
+            "message": message
+    }
+    return make_response(jsonify(response)),HTTPStatus.OK.value
+
+def ok_with_meta(data, meta):
+    response = {
+            "code": "200",
+            "status": "OK",
+            "data": data,
+            "meta": meta
     }
     return make_response(jsonify(response)),HTTPStatus.OK.value
 

@@ -7,6 +7,7 @@ from datetime import datetime
 from app.models.user import User
 from app.models.address import Address
 from app.response_validator import *
+from sqlalchemy import update
 
 def create_user():
     try:
@@ -104,14 +105,14 @@ def read_user(id):
                 "kecamatan": address.kecamatan
             }
         }
-        return response_handler.ok(data)
+        return response_handler.ok(data,"")
 
     except Exception as err:
         return response_handler.bad_gateway(str(err))
     
 def update_user(id):
     try:
-        id_user = User.query.values(User.id_user)
+        id_user = User.query.all()
         exist = False
         for i in id_user:
             if(str(i.id_user) == id):
@@ -133,9 +134,17 @@ def update_user(id):
                     return response_handler.bad_request(errors['{field}'][0])
             return response_handler.bad_request(errors)
         
+        
         user = User.query.filter_by(id_user = id).first()
         address = user.address
-        
+
+        if result['username'] == user.username:
+            user.username = result['username']
+        else:
+            existing_user = User.query.filter_by(username=result['username']).first()
+            if existing_user:
+                return response_handler.bad_request('Username already exists')
+
         user.name = result['name']
         user.username = result['username']
         user.email = result['email']
@@ -160,12 +169,67 @@ def update_user(id):
             "kelurahan_desa": address.kelurahan_desa,
             "kecamatan": address.kecamatan
         }
-        
-        return response_handler.ok(data)
+        return response_handler.ok(data, "Your data is updated")
 
     except KeyError as err:
         return response_handler.bad_request(f'{err.args[0]} field must be filled')
     
     except Exception as err:
         return response_handler.bad_gateway(str(err))
+    
+def delete_user(id):
+    try:
+        id_user = User.query.all()
+        exists = False
+        for i in id_user:
+            if (str(i.id_user) == id):
+                exists = True
+                break
+
+        if not exists:
+            return response_handler.not_found('User Not Found')
+        
+        user = User.query.get(id)
+        db.session.delete(user)
+        db.session.commit()
+        return response_handler.ok("","User Successfull Deleted")
+    
+    except Exception as err:
+        return response_handler.bad_gateway(err)
+
+def list_user():
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 5, type=int )
+        total_user = User.query.count()
+        if not per_page:
+            per_page = total_user
+
+        user = User.query.order_by(User.created_at.desc()).paginate(page = page, per_page = per_page)
+        data = []
+        for i in user.items:
+            data.append({
+                "id_user": i.id_user,
+                "name": i.name,
+                "username": i.username,
+                "email": i.email,
+                "password": i.password,
+                "address.address": i.address.address,
+                "address.rt": i.address.rt,
+                "address.rw": i.address.rw,
+                "address.kelurahan_desa": i.address.kelurahan_desa,
+                "address.kecamatan": i.address.kecamatan
+            })
+        meta = {
+            "page": user.page,
+            "pages": user.pages,
+            "total_count": user.total,
+            "prev_page": user.prev_num,
+            "next_page": user.next_num,
+            "has_prev": user.has_prev,
+            "has_next": user.has_next
+        }
+        return response_handler.ok_with_meta(data,meta)
+    except Exception as err:
+        return response_handler.bad_gateway(err)
         
